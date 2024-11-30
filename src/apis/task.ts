@@ -1,6 +1,6 @@
 import httpInstance from "@/util/http";
 
-export const addTask = (data: any) => {
+export const addTaskAPI = (data: any) => {
   return httpInstance({
     url: "/todo/tasks",
     method: "POST",

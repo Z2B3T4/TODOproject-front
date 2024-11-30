@@ -66,23 +66,27 @@
         <!-- 分组 -->
         <el-form-item label="分组" prop="group">
           <el-select v-model="taskForm.groupId" placeholder="请选择分组">
-            <el-option label="默认分组" :value="0" />
-            <el-option label="工作" :value="1" />
-            <el-option label="学习" :value="2" />
-            <el-option label="生活" :value="3" />
+            <el-option
+              :label="item.name"
+              :value="item.id"
+              v-for="item in groupStore.groupList"
+              :key="item.id"
+            />
           </el-select>
         </el-form-item>
 
         <!-- 分类 -->
         <el-form-item label="分类" prop="category">
           <el-select v-model="taskForm.category" placeholder="请选择分类">
-            <el-option label="默认分类" :value="0" />
-            <el-option label="待办" :value="1" />
-            <el-option label="进行中" :value="2" />
-            <el-option label="已完成" :value="3" />
+            <el-option
+              :label="item.name"
+              :value="item.id"
+              v-for="item in categoryStore.categoryList"
+              :key="item.id"
+            />
           </el-select>
         </el-form-item>
-        <el-form-item label="级别标签" prop="category">
+        <el-form-item label="级别标签">
           <el-select v-model="taskForm.type">
             <el-option label="一级分类" :value="1" />
             <el-option label="二级分类" :value="2" />
@@ -215,12 +219,14 @@
 
 <script setup>
 // #region 引入组件
-import { ref, reactive } from "vue";
+import { ref, reactive, onMounted } from "vue";
 import { ElMessage } from "element-plus";
 import { Search } from "@element-plus/icons-vue";
-import { addTask } from "@/apis/task";
-import { addGroup } from "@/apis/group";
-import { addCategory } from "@/apis/category";
+import { addTaskAPI } from "@/apis/task";
+import { addGroupAPI } from "@/apis/group";
+import { addCategoryAPI } from "@/apis/category";
+import { useGroupStore } from "@/stores/groupStore";
+import { useCategoryStore } from "@/stores/categoryStore";
 
 // #endregion
 
@@ -233,7 +239,7 @@ const changeInputWidth = (focused) => {
 };
 // #endregion
 
-// #region 新增表单
+// #region 新增任务
 // 这个控制弹窗的显示与隐藏
 const dialogVisible = ref(false);
 const taskFormRef = ref();
@@ -263,9 +269,9 @@ const handleCreateTask = () => {
  */
 const handleSubmit = () => {
   // 调用表单验证方法，如果表单数据有效，则valid为true
-  taskFormRef.value.validate((valid) => {
+  taskFormRef.value.validate(async (valid) => {
     if (valid) {
-      addTask(taskForm).then((res) => {
+      await addTaskAPI(taskForm).then((res) => {
         console.log("任务添加成功！", res);
         ElMessage({
           message: "Congrats, this is a success message.",
@@ -318,7 +324,7 @@ const handleGroupSubmit = () => {
   groupFormRef.value.validate(async (valid) => {
     if (valid) {
       console.log("新分组数据：", groupForm);
-      await addGroup(groupForm)
+      await addGroupAPI(groupForm)
         .then((res) => {
           console.log("分组添加成功！");
           ElMessage.success("分组添加成功！");
@@ -366,7 +372,7 @@ const handleCategorySubmit = () => {
   categoryFormRef.value.validate(async (valid) => {
     if (valid) {
       console.log("新分类数据：", categoryForm);
-      await addCategory(categoryForm)
+      await addCategoryAPI(categoryForm)
         .then((res) => {
           console.log("分类添加成功！", res);
           ElMessage.success("添加分类成功！");
@@ -390,6 +396,22 @@ const resetCategoryForm = () => {
     color: "#ffffff",
   });
 };
+// #endregion
+
+// #region 获取分组列表
+const groupStore = useGroupStore();
+onMounted(() => {
+  groupStore.getGroupList();
+  // console.log("分类列表：", groupStore.groupList[0].name);
+});
+// #endregion
+
+// #region 获取分类列表
+const categoryStore = useCategoryStore();
+onMounted(() => {
+  categoryStore.getCategoryList();
+  console.log("分类列表：", categoryStore.categoryList[0]);
+});
 // #endregion
 </script>
 
