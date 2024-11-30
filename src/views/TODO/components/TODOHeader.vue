@@ -211,7 +211,6 @@
       </template>
     </el-dialog>
   </div>
-  <data value=""></data>
 </template>
 
 <script setup>
