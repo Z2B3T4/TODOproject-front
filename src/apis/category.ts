@@ -1,8 +1,8 @@
 import httpInstance from "@/util/http";
 
-export const addTask = (data: any) => {
+export const addCategory = (data: any) => {
   return httpInstance({
-    url: "/todo/tasks",
+    url: "/todo/categorys",
     method: "POST",
     data,
   });

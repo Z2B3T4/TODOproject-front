@@ -155,9 +155,9 @@
         <!-- 分组优先级 -->
         <el-form-item label="优先级">
           <el-select v-model="groupForm.priority" placeholder="请选择优先级">
-            <el-option label="高" value="high" />
-            <el-option label="中" value="medium" />
-            <el-option label="低" value="low" />
+            <el-option label="高" :value="0" />
+            <el-option label="中" :value="1" />
+            <el-option label="低" :value="2" />
           </el-select>
         </el-form-item>
       </el-form>
@@ -219,6 +219,8 @@ import { ref, reactive } from "vue";
 import { ElMessage } from "element-plus";
 import { Search } from "@element-plus/icons-vue";
 import { addTask } from "@/apis/task";
+import { addGroup } from "@/apis/group";
+import { addCategory } from "@/apis/category";
 
 // #endregion
 
@@ -301,7 +303,7 @@ const groupFormRef = ref();
 const groupForm = reactive({
   name: "",
   description: "",
-  priority: "medium",
+  priority: 0,
 });
 // 分组验证规则
 const groupRules = {
@@ -313,10 +315,17 @@ const handleCreateGroup = () => {
 };
 // 提交分组表单
 const handleGroupSubmit = () => {
-  groupFormRef.value.validate((valid) => {
+  groupFormRef.value.validate(async (valid) => {
     if (valid) {
       console.log("新分组数据：", groupForm);
-      ElMessage.success("分组添加成功！");
+      await addGroup(groupForm)
+        .then((res) => {
+          console.log("分组添加成功！");
+          ElMessage.success("分组添加成功！");
+        })
+        .catch((err) => {
+          ElMessage.error("分组添加失败！");
+        });
       groupDialogVisible.value = false;
       resetGroupForm();
     } else {
@@ -354,9 +363,17 @@ const handleCreateCategory = () => {
 };
 // 提交分类表单
 const handleCategorySubmit = () => {
-  categoryFormRef.value.validate((valid) => {
+  categoryFormRef.value.validate(async (valid) => {
     if (valid) {
       console.log("新分类数据：", categoryForm);
+      await addCategory(categoryForm)
+        .then((res) => {
+          console.log("分类添加成功！", res);
+          ElMessage.success("添加分类成功！");
+        })
+        .catch((err) => {
+          ElMessage.error("添加分类失败！", err);
+        });
       ElMessage.success("分类添加成功！");
       categoryDialogVisible.value = false;
       resetCategoryForm();
