@@ -263,9 +263,6 @@ const handleSubmit = () => {
   // 调用表单验证方法，如果表单数据有效，则valid为true
   taskFormRef.value.validate((valid) => {
     if (valid) {
-      // 打印新任务的数据到控制台
-      console.log("新任务数据：", taskForm.type);
-      console.log("新任务数据：", taskForm.groupId);
       addTask(taskForm).then((res) => {
         console.log("任务添加成功！", res);
         ElMessage({
