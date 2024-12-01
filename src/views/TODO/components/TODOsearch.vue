@@ -98,7 +98,7 @@ const taskStore = useTaskStore();
 const groupStore = useGroupStore();
 const categoryStore = useCategoryStore();
 
-// #region 进行查询
+// #region 进行查询任务信息
 // 查询条件
 const searchCriteria = ref({
   timeRange: "",
@@ -118,7 +118,6 @@ const handleSearch = async () => {
   // console.log("查询条件：", searchCriteria.value.groupId);
   // console.log("查询条件：", searchCriteria.value.categoryId);
 };
-// #endregion
 
 // 重置操作
 const resetSearch = () => {
@@ -134,6 +133,7 @@ const resetSearch = () => {
     pageSize: 5,
   };
 };
+// #endregion
 </script>
 
 <style lang="scss" scoped>

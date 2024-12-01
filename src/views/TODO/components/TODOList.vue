@@ -28,7 +28,10 @@
         </div>
       </div>
       <div class="second-list">
-        <div class="second-list-title">{{ fatherName }}子任务</div>
+        <div class="second-list-title">
+          {{ fatherName }}子任务
+          <div class="add-subtask" @click="addSubTask">新增子任务</div>
+        </div>
         <ListItem
           v-for="(item, index) in taskStore.SubtaskList"
           :key="item.id"
@@ -43,6 +46,86 @@
       </div>
     </div>
   </div>
+  <!-- 新建二级任务弹窗 -->
+  <div class="add-list" v-show="dialogVisible === true">
+    <el-dialog v-model="dialogVisible" title="新增任务" width="500px" draggable>
+      <el-form
+        :model="taskForm"
+        :rules="rules"
+        ref="taskFormRef"
+        label-width="100px"
+      >
+        <!-- 任务名称 -->
+        <el-form-item label="任务名称" prop="name">
+          <el-input v-model="taskForm.name" placeholder="请输入任务名称" />
+        </el-form-item>
+
+        <!-- 分组 -->
+        <el-form-item label="分组" prop="group">
+          <el-select v-model="taskForm.groupId" placeholder="请选择分组">
+            <el-option
+              :label="item.name"
+              :value="item.id"
+              v-for="item in groupStore.groupList"
+              :key="item.id"
+            />
+          </el-select>
+        </el-form-item>
+
+        <!-- 分类 -->
+        <el-form-item label="分类" prop="category">
+          <el-select v-model="taskForm.category" placeholder="请选择分类">
+            <el-option
+              :label="item.name"
+              :value="item.id"
+              v-for="item in categoryStore.categoryList"
+              :key="item.id"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="级别标签">
+          <el-select v-model="taskForm.type">
+            <el-option label="二级分类" :value="2" />
+          </el-select>
+        </el-form-item>
+
+        <!-- 起始时间 -->
+        <el-form-item label="起始时间">
+          <el-date-picker
+            v-model="taskForm.startTime"
+            type="date"
+            placeholder="选择起始时间"
+            clearable
+            style="width: 100%"
+            value-format="YYYY-MM-DD"
+          />
+        </el-form-item>
+
+        <!-- 终止时间 -->
+        <el-form-item label="终止时间">
+          <el-date-picker
+            v-model="taskForm.endTime"
+            type="date"
+            placeholder="选择终止时间"
+            clearable
+            style="width: 100%"
+            value-format="YYYY-MM-DD"
+          />
+        </el-form-item>
+
+        <!-- 是否重要 -->
+        <el-form-item label="是否重要">
+          <el-switch v-model="taskForm.isImportant" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="dialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="handleSubmit">确认</el-button>
+        </div>
+      </template>
+    </el-dialog>
+  </div>
 </template>
 
 <script setup>
@@ -53,6 +136,12 @@ import { ref } from "vue";
 import TODOsearch from "@/views/TODO/components/TODOsearch.vue";
 import { useTaskStore } from "@/stores/taskStore";
 import { useRoute } from "vue-router";
+import { addTaskAPI } from "@/apis/task";
+import { useGroupStore } from "@/stores/groupStore";
+import { useCategoryStore } from "@/stores/categoryStore";
+const groupStore = useGroupStore();
+const categoryStore = useCategoryStore();
+
 // #endregion
 const route = useRoute();
 let flag = parseInt(route.params.typeId, 10); // 转换为整数
@@ -83,9 +172,12 @@ totalTaskCount.value = taskStore.totalTaskList.length;
 
 // #region 获取子任务数据
 const fatherName = ref("");
+const fatherId = ref(0);
 const selectSubTask = (item) => {
   console.log("传过来的id", item.id);
   fatherName.value = item.name;
+  fatherId.value = item.id;
+  console.log("传过来的id", fatherId.value, item.id);
   taskStore.getSubTask(item.id);
 
   console.log(taskStore.SubtaskList[0]);
@@ -109,23 +201,72 @@ const handlePageChange = (page) => {
 };
 // #endregion
 
-// 执行提升逻辑
-const handleLift = (id) => {
-  console.log("父组件提升操作，索引：", id);
-  // 实现提升逻辑，比如交换任务顺序
-  // if (index > 0) {
-  //   console.log(todos.value);
-  //   const temp = todos.value[index];
-  //   todos.value.splice(index, 1);
-  //   todos.value.splice(index - 1, 0, temp);
-  //   console.log(todos.value);
-  // }
+// #region 新增二级任务
+// 这个控制弹窗的显示与隐藏
+const dialogVisible = ref(false);
+const taskFormRef = ref();
+const taskForm = reactive({
+  name: "",
+  groupId: "",
+  category: "",
+  startTime: "",
+  endTime: "",
+  isImportant: false,
+  type: "",
+  taskId: fatherId,
+});
+// 自定义规则
+const rules = {
+  name: [{ required: true, message: "任务名称不能为空", trigger: "blur" }],
+};
+// 当点击添加任务按钮时，控制属性，显示弹窗
+const addSubTask = () => {
+  console.log(fatherId.value);
+
+  dialogVisible.value = true;
 };
 
-const handleDelete = (index) => {
-  console.log("父组件删除操作，索引：", index);
-  todos.value.splice(index, 1);
+/**
+ * 提交任务表单的函数
+ * 该函数没有参数
+ * 没有返回值
+ * 主要功能是验证任务表单的数据是否有效，如果有效则添加任务，否则提示用户填写必要的任务信息
+ */
+const handleSubmit = () => {
+  // 调用表单验证方法，如果表单数据有效，则valid为true
+  taskFormRef.value.validate(async (valid) => {
+    if (valid) {
+      console.log("taskFormRef.value.fatherId", taskFormRef.value.taskId);
+      await addTaskAPI(taskForm).then((res) => {
+        console.log("任务添加成功！", res);
+        ElMessage({
+          message: "任务添加成功！",
+          type: "success",
+        });
+      });
+      // 关闭任务添加对话框
+      dialogVisible.value = false;
+      // 调用重置表单的函数
+      resetForm();
+    } else {
+      // 如果表单数据无效，显示错误消息提示用户
+      ElMessage.error("请填写必要的任务信息！");
+    }
+  });
 };
+
+const resetForm = () => {
+  Object.assign(taskForm, {
+    name: "",
+    groupId: "",
+    category: "",
+    startTime: "",
+    endTime: "",
+    isImportant: false,
+    taskId: "",
+  });
+};
+// #endregion
 </script>
 
 <style lang="scss" scoped>
@@ -163,11 +304,19 @@ const handleDelete = (index) => {
       height: 100%;
       border: 2px solid green;
       .second-list-title {
+        padding: 50px;
         text-align: center;
+        justify-content: center;
         align-content: center;
         height: 10%;
-        width: 100%;
+        width: 80%;
         font-size: large;
+        display: flex;
+        .add-subtask {
+          position: absolute;
+          right: 10%;
+          color: rgb(91, 207, 246);
+        }
       }
     }
   }

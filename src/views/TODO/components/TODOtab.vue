@@ -65,10 +65,9 @@ const activeTab = ref(route.path);
 // 判断当前路由是否为选中状态
 const isActive = (path) => route.path === path;
 
+// #region 监听路由变化，并实时获取数据
 // 定义 flag
 const flag = ref(null);
-
-// 监听路由变化
 watch(
   () => route.path,
   (newPath) => {
@@ -85,11 +84,7 @@ watch(
   },
   { immediate: true } // 初始化时也调用一次
 );
-
-// tab 切换时调用
-const changeTab = () => {
-  // 可以选择在此触发其他逻辑
-};
+// #endregion
 </script>
 
 <style lang="scss" scoped>

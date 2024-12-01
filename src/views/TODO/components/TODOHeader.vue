@@ -11,10 +11,10 @@
       <TextButton text="新建分类" @click="handleCreateCategory">
         <el-icon><Plus /></el-icon>
       </TextButton>
-      <TextButton text="日程表">
+      <TextButton text="日程表" @click="todo">
         <el-icon><Calendar /></el-icon>
       </TextButton>
-      <TextButton text="开始专注">
+      <TextButton text="开始专注" @click="handleFocus">
         <el-icon><Clock /></el-icon>
       </TextButton>
     </div>
@@ -89,7 +89,6 @@
         <el-form-item label="级别标签">
           <el-select v-model="taskForm.type">
             <el-option label="一级分类" :value="1" />
-            <el-option label="二级分类" :value="2" />
           </el-select>
         </el-form-item>
 
@@ -214,6 +213,22 @@
       </template>
     </el-dialog>
   </div>
+  <div class="focus-timer" v-show="timerDialogVisible">
+    <el-dialog
+      v-model="timerDialogVisible"
+      title="专注计时"
+      width="300px"
+      draggable
+      :close-on-click-modal="false"
+      :show-close="false"
+      custom-class="focus-dialog"
+    >
+      <div class="timer-display">{{ formattedTime }}</div>
+      <div class="timer-footer">
+        <el-button type="danger" @click="stopTimer">结束</el-button>
+      </div>
+    </el-dialog>
+  </div>
 </template>
 
 <script setup>
@@ -226,9 +241,12 @@ import { addGroupAPI } from "@/apis/group";
 import { addCategoryAPI } from "@/apis/category";
 import { useGroupStore } from "@/stores/groupStore";
 import { useCategoryStore } from "@/stores/categoryStore";
+import { computed } from "vue";
 
 // #endregion
-
+const todo = () => {
+  ElMessage.warning("敬请期待");
+};
 // #region 搜索框相关
 const inputText = ref("");
 const isFocused = ref(false);
@@ -270,6 +288,7 @@ const handleSubmit = () => {
   // 调用表单验证方法，如果表单数据有效，则valid为true
   taskFormRef.value.validate(async (valid) => {
     if (valid) {
+      console.log(taskFormRef.value.type);
       await addTaskAPI(taskForm).then((res) => {
         console.log("任务添加成功！", res);
         ElMessage({
@@ -412,6 +431,52 @@ onMounted(() => {
   console.log("分类列表：", categoryStore.categoryList[0]);
 });
 // #endregion
+
+// #region 专注计时
+const timerDialogVisible = ref(false); // 控制弹窗显示
+const timer = ref(null); // 保存定时器
+const elapsedTime = ref(0); // 累计的时间（秒）
+
+// 格式化时间为 mm:ss
+const formattedTime = computed(() => {
+  const minutes = Math.floor(elapsedTime.value / 60)
+    .toString()
+    .padStart(2, "0");
+  const seconds = (elapsedTime.value % 60).toString().padStart(2, "0");
+  return `${minutes}:${seconds}`;
+});
+
+// 开始计时
+const handleFocus = () => {
+  timerDialogVisible.value = true;
+  elapsedTime.value = 0; // 重置时间
+  timer.value = setInterval(() => {
+    elapsedTime.value += 1;
+  }, 1000);
+
+  // 添加键盘事件监听
+  document.addEventListener("keydown", handleKeydown);
+};
+
+// 停止计时
+const stopTimer = () => {
+  clearInterval(timer.value);
+  timer.value = null;
+  timerDialogVisible.value = false;
+
+  // 移除键盘事件监听
+  document.removeEventListener("keydown", handleKeydown);
+
+  ElMessage.success(`专注计时结束，总时长：${formattedTime.value}`);
+};
+
+// 监听键盘事件，回车或空格停止计时
+const handleKeydown = (event) => {
+  if (event.key === " " || event.key === "Enter") {
+    stopTimer();
+  }
+};
+// #endregion
 </script>
 
 <style lang="scss" scoped>
@@ -452,5 +517,20 @@ onMounted(() => {
 }
 .el-message {
   z-index: 9999 !important;
+}
+.focus-dialog {
+  text-align: center;
+}
+
+.timer-display {
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 20px 0;
+}
+
+.timer-footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
 }
 </style>
