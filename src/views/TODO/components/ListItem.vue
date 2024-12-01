@@ -247,10 +247,22 @@ const handleSubmit = () => {
   });
 };
 // #endregion
-// 提升任务
-const handleLift = async () => {};
-
-// 删除任务
+// #region 提升任务
+const handleLift = async () => {
+  if (props.item.sort <= 0) {
+    return ElMessage.error("任务已经在最上面了！");
+  }
+  props.item.sort = props.item.sort - 1;
+  await taskStore.updateTask(props.item);
+  taskStore.searchTask({
+    page: 1,
+    pageSize: 5,
+    flag: props.flag,
+  });
+  ElMessage.success("任务提升成功！");
+};
+// #endregion
+// #region 删除任务
 const handleDelete = async () => {
   const deletedata = {
     id: props.item.id,
@@ -269,6 +281,8 @@ const handleDelete = async () => {
     ElMessage.error("任务提升失败！");
   }
 };
+// #endregion
+
 // #region 完成任务
 
 const handleFinish = async () => {
