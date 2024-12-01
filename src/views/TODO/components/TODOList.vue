@@ -5,24 +5,32 @@
       <div class="first-list">
         <div class="first-list-title">任务列表</div>
         <ListItem
-          v-for="(item, index) in todos"
-          :key="index"
+          v-for="(item, index) in taskStore.taskList"
+          :key="item.id"
           :item="item"
           :index="index"
           :isFirst="index === 0"
           :id="item.id"
           @lift="handleLift"
           @delete="handleDelete"
+          @click="selectSubTask(item.id)"
         />
         <div class="first-list-pagination">
-          <el-pagination background layout="prev, pager, next" :total="1000" />
+          <el-pagination
+            background
+            layout="prev, pager, next"
+            :total="30"
+            :current-page="currentPage"
+            :page-size="pageSize"
+            @current-change="handlePageChange"
+          />
         </div>
       </div>
       <div class="second-list">
         <div class="second-list-title">xxx的子任务</div>
         <ListItem
-          v-for="(item, index) in todos"
-          :key="index"
+          v-for="(item, index) in taskStore.SubtaskList"
+          :key="item.id"
           :item="item"
           :index="index"
           :isFirst="index === 0"
@@ -36,21 +44,66 @@
 </template>
 
 <script setup>
-import { reactive } from "vue";
+// #region 引入相关组件
+import { onMounted, reactive } from "vue";
 import ListItem from "@/views/TODO/components/ListItem.vue";
 import { ref } from "vue";
 import TODOsearch from "@/views/TODO/components/TODOsearch.vue";
+import { useTaskStore } from "@/stores/taskStore";
+import { useRoute } from "vue-router";
+// #endregion
+const route = useRoute();
 
-// =======================================
-// 作为列表渲染传入子组件
+// #region 初始化渲染任务列表
+let flag = parseInt(route.params.typeId, 10); // 转换为整数
+const taskStore = useTaskStore();
+const Initdata = {
+  page: 1,
+  pageSize: 5,
+  flag: flag,
+};
+onMounted(() => {
+  taskStore.getTaskPageList(Initdata);
+});
+// #endregion
 
-const todos = ref([
-  { context: "xxx任务1", id: 1 },
-  { context: "xxx任务2", id: 2 },
-  { context: "xxx任务3", id: 3 },
-  { context: "xxx任务3", id: 4 },
-  { context: "xxx任务3", id: 5 },
-]);
+// #region 获取全部数据，计算总共的条数
+const totalTaskCount = ref(50);
+
+const totaldata = {
+  type: 1,
+  flag: flag,
+};
+onMounted(() => {
+  taskStore.getTotalTaskList(totaldata);
+});
+totalTaskCount.value = taskStore.totalTaskList.length;
+// #endregion
+// #region 获取子任务数据
+const selectSubTask = (id) => {
+  console.log("传过来的id", id);
+  taskStore.getSubTask(id);
+  console.log(taskStore.SubtaskList[0]);
+};
+// #endregion
+
+// #region分页查询
+const currentPage = ref(1); // 默认当前页
+const pageSize = ref(5); // 默认每页条数
+const handlePageChange = (page) => {
+  let flag = parseInt(route.params.typeId, 10); // 转换为整数
+  currentPage.value = page; // 更新当前页
+  console.log("当前页码:", page);
+  // 在这里可以发送请求或其他逻辑
+  const data = {
+    page: page,
+    pageSize: pageSize.value,
+    flag: flag,
+  };
+  taskStore.getTaskPageList(data);
+};
+// #endregion
+
 // 执行提升逻辑
 const handleLift = (id) => {
   console.log("父组件提升操作，索引：", id);

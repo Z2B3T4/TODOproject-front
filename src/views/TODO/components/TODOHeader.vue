@@ -173,7 +173,6 @@
       </template>
     </el-dialog>
   </div>
-
   <!-- 新建分类弹窗 -->
   <div class="add-category" v-show="categoryDialogVisible === true">
     <el-dialog
@@ -274,7 +273,7 @@ const handleSubmit = () => {
       await addTaskAPI(taskForm).then((res) => {
         console.log("任务添加成功！", res);
         ElMessage({
-          message: "Congrats, this is a success message.",
+          message: "任务添加成功！",
           type: "success",
         });
       });

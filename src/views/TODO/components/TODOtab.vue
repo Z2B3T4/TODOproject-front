@@ -1,6 +1,6 @@
 <template>
   <el-tabs type="border-card" class="demo-tabs" v-model="activeTab">
-    <el-tab-pane name="0">
+    <el-tab-pane name="0" @click="changeTab">
       <template #label>
         <RouterLink :to="{ path: '/todo/list/0' }">
           <span
@@ -16,7 +16,7 @@
       </template>
       <RouterView />
     </el-tab-pane>
-    <el-tab-pane name="1">
+    <el-tab-pane name="1" @click="changeTab">
       <template #label>
         <RouterLink :to="{ path: '/todo/list/1' }">
           <span
@@ -32,7 +32,7 @@
       </template>
       <RouterView />
     </el-tab-pane>
-    <el-tab-pane name="2">
+    <el-tab-pane name="2" @click="changeTab">
       <template #label>
         <RouterLink :to="{ path: '/todo/list/2' }">
           <span
@@ -53,14 +53,43 @@
 
 <script setup>
 import { Calendar } from "@element-plus/icons-vue";
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { useRoute } from "vue-router";
+import { useTaskStore } from "@/stores/taskStore";
 
 const route = useRoute();
+const taskStore = useTaskStore();
+
 const activeTab = ref(route.path);
 
 // 判断当前路由是否为选中状态
 const isActive = (path) => route.path === path;
+
+// 定义 flag
+const flag = ref(null);
+
+// 监听路由变化
+watch(
+  () => route.path,
+  (newPath) => {
+    // 从路径中提取最后一个数字
+    const match = newPath.match(/\/(\d+)$/);
+    flag.value = match ? parseInt(match[1], 10) : null;
+
+    // 获取数据
+    taskStore.getTaskPageList({
+      page: 1,
+      pageSize: 5,
+      flag: flag.value,
+    });
+  },
+  { immediate: true } // 初始化时也调用一次
+);
+
+// tab 切换时调用
+const changeTab = () => {
+  // 可以选择在此触发其他逻辑
+};
 </script>
 
 <style lang="scss" scoped>
