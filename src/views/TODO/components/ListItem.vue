@@ -16,7 +16,11 @@
         提升
       </div>
       <div class="todo-item-list-delete" @click="handleDelete">删除</div>
-      <div class="todo-item-list-finish" @click="handleFinish">
+      <div
+        class="todo-item-list-finish"
+        @click="handleFinish"
+        v-if="flag === 0"
+      >
         <div class="circle">
           <div class="checkmark"></div>
         </div>

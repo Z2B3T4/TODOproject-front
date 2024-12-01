@@ -11,9 +11,6 @@
       <TextButton text="新建分类" @click="handleCreateCategory">
         <el-icon><Plus /></el-icon>
       </TextButton>
-      <TextButton text="日程表" @click="todo">
-        <el-icon><Calendar /></el-icon>
-      </TextButton>
       <TextButton text="开始专注" @click="handleFocus">
         <el-icon><Clock /></el-icon>
       </TextButton>
@@ -243,10 +240,6 @@ import { useGroupStore } from "@/stores/groupStore";
 import { useCategoryStore } from "@/stores/categoryStore";
 import { computed } from "vue";
 
-// #endregion
-const todo = () => {
-  ElMessage.warning("敬请期待");
-};
 // #region 搜索框相关
 const inputText = ref("");
 const isFocused = ref(false);
@@ -345,6 +338,7 @@ const handleGroupSubmit = () => {
       await addGroupAPI(groupForm)
         .then((res) => {
           console.log("分组添加成功！");
+          groupStore.getGroupList();
           ElMessage.success("分组添加成功！");
         })
         .catch((err) => {
@@ -393,6 +387,7 @@ const handleCategorySubmit = () => {
       await addCategoryAPI(categoryForm)
         .then((res) => {
           console.log("分类添加成功！", res);
+          categoryStore.getCategoryList();
           ElMessage.success("添加分类成功！");
         })
         .catch((err) => {

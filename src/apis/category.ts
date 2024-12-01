@@ -13,3 +13,9 @@ export const getCategoryListAPI = () => {
     method: "GET",
   });
 };
+export const deleteCategoryAPI = (id: any) => {
+  return httpInstance({
+    url: `/todo/categorys/${id}`,
+    method: "DELETE",
+  });
+};

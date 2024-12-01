@@ -30,7 +30,13 @@
       <div class="second-list">
         <div class="second-list-title">
           {{ fatherName }}子任务
-          <div class="add-subtask" @click="addSubTask">新增子任务</div>
+          <div
+            class="add-subtask"
+            @click="addSubTask"
+            v-if="route.params.typeId === '0'"
+          >
+            新增子任务
+          </div>
         </div>
         <ListItem
           v-for="(item, index) in taskStore.SubtaskList"
