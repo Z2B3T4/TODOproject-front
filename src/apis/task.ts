@@ -61,3 +61,11 @@ export const finishTaskAPI = (data: any) => {
     data,
   });
 };
+
+export const deleteTaskAPI = (data: any) => {
+  return httpInstance({
+    url: "/todo/tasks",
+    method: "DELETE",
+    data,
+  });
+};

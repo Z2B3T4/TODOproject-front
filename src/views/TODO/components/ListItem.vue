@@ -154,7 +154,7 @@ import { useTaskStore } from "@/stores/taskStore";
 import { useCategoryStore } from "@/stores/categoryStore";
 import { useGroupStore } from "@/stores/groupStore";
 import { ElMessage } from "element-plus";
-import { finishTaskAPI } from "@/apis/task";
+import { finishTaskAPI, deleteTaskAPI } from "@/apis/task";
 import confetti from "canvas-confetti";
 const taskStore = useTaskStore();
 const categoryStore = useCategoryStore();
@@ -248,13 +248,26 @@ const handleSubmit = () => {
 };
 // #endregion
 // 提升任务
-const handleLift = () => {
-  emit("lift", props.id);
-};
+const handleLift = async () => {};
 
 // 删除任务
-const handleDelete = () => {
-  emit("delete", props.id);
+const handleDelete = async () => {
+  const deletedata = {
+    id: props.item.id,
+    type: props.item.type,
+  };
+  const res = await deleteTaskAPI(deletedata);
+  if (res.code === 200) {
+    taskStore.searchTask({
+      page: 1,
+      pageSize: 5,
+      flag: props.flag,
+    });
+    ElMessage.success("任务提升成功！");
+  } else {
+    console.log(res);
+    ElMessage.error("任务提升失败！");
+  }
 };
 // #region 完成任务
 
