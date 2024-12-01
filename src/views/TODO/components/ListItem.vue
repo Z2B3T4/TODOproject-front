@@ -16,6 +16,11 @@
         提升
       </div>
       <div class="todo-item-list-delete" @click="handleDelete">删除</div>
+      <div class="todo-item-list-finish" @click="handleFinish">
+        <div class="circle">
+          <div class="checkmark"></div>
+        </div>
+      </div>
     </div>
 
     <!-- 任务详情弹窗 -->
@@ -143,11 +148,14 @@
 </template>
 
 <script setup>
+//
 import { defineProps, defineEmits, ref, computed } from "vue";
 import { useTaskStore } from "@/stores/taskStore";
 import { useCategoryStore } from "@/stores/categoryStore";
 import { useGroupStore } from "@/stores/groupStore";
 import { ElMessage } from "element-plus";
+import { finishTaskAPI } from "@/apis/task";
+import confetti from "canvas-confetti";
 const taskStore = useTaskStore();
 const categoryStore = useCategoryStore();
 const groupStore = useGroupStore();
@@ -248,8 +256,39 @@ const handleLift = () => {
 const handleDelete = () => {
   emit("delete", props.id);
 };
+// #region 完成任务
 
-// 动态计算背景样式
+const handleFinish = async () => {
+  // 触发花瓣雨效果
+
+  const finishdata = {
+    id: props.item.id,
+    type: props.item.type,
+  };
+  const res = await finishTaskAPI(finishdata);
+  if (res.code === 200) {
+    taskStore.searchTask({
+      page: 1,
+      pageSize: 5,
+      flag: props.flag,
+    });
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { x: 0.5, y: 0.5 }, // 中心点
+      colors: ["#ff9f43", "#f368e0", "#ff6b6b", "#48dbfb"], // 粒子颜色
+    });
+    setTimeout(() => {
+      ElMessage.success("任务已完成！");
+    }, 500);
+  } else {
+    console.log(res);
+    ElMessage.error("任务完成失败！");
+  }
+};
+// #endregion
+
+// #region计算完成进度背景色
 const progressStyle = computed(() => {
   const progress = props.item?.progress_num || 0; // 默认值为 0
   return {
@@ -269,6 +308,7 @@ const chargingEffectStyle = computed(() => {
     animationDelay: `${-progress / 10}s`, // 动态延迟确保动画效果平滑
   };
 });
+// #endregion
 </script>
 
 <style lang="scss" scoped>
@@ -342,12 +382,44 @@ const chargingEffectStyle = computed(() => {
       align-items: center;
       justify-content: center;
       width: 25%; /* 每个按钮的宽度 */
-      padding: 0 5%;
+
       cursor: pointer;
       transition: color 0.3s;
 
       &:hover {
         color: rgb(80, 198, 238); /* 悬停效果 */
+      }
+    }
+    .todo-item-list-finish {
+      position: relative;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      margin-right: 10px;
+
+      .circle {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        border: 2px solid #45c776;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        transition: all 0.3s ease-in-out;
+
+        .checkmark {
+          width: 12px;
+          height: 24px;
+          border: solid #45c776;
+          border-width: 0 4px 4px 0;
+          transform: rotate(45deg);
+          transition: all 0.3s ease-in-out;
+        }
       }
     }
   }

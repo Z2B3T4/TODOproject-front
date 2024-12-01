@@ -130,6 +130,8 @@ const resetSearch = () => {
     isImportant: false,
     groupId: "",
     categoryId: "",
+    page: 1,
+    pageSize: 5,
   };
 };
 </script>
