@@ -160,11 +160,11 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["lift", "delete", "update"]); // 事件声明
+// #region 查看详情
 // 详情逻辑
 const aboutItem = ref({});
 const aboutDialogVisible = ref(false);
 
-// #region 查看详情
 const handleAbout = () => {
   const foundItem =
     taskStore.taskList.find((item) => item.id === props.id) ||
@@ -208,7 +208,7 @@ const handleUpdate = () => {
     editDialogVisible.value = true;
   }
 };
-
+// 执行提交
 const handleSubmit = () => {
   editFormRef.value.validate((valid) => {
     if (valid) {
@@ -250,16 +250,25 @@ const handleDelete = () => {
 };
 
 // 动态计算背景样式
-const progressStyle = computed(() => ({
-  background: `linear-gradient(to right, rgba(173, 216, 230, 0.8), rgba(255, 183, 77, 0.8))`,
-  backgroundSize: `${Math.min(props.item?.progress_num || 0, 100)}% 100%`,
-  transition: "background-size 0.5s ease-in-out",
-}));
+const progressStyle = computed(() => {
+  const progress = props.item?.progress_num || 0; // 默认值为 0
+  return {
+    background: `linear-gradient(to right, rgba(173, 216, 230, 0.8), rgba(255, 183, 77, 0.8))`,
+    backgroundSize: `${Math.min(progress, 100)}% 100%`,
+    backgroundRepeat: "no-repeat",
+    position: "relative",
+    transition: "background-size 0.5s ease-in-out",
+  };
+});
 
-const chargingEffectStyle = computed(() => ({
-  left: `${Math.min(props.item?.progress_num || 0, 100)}%`,
-  animationDelay: `${-(props.item?.progress_num || 0) / 10}s`,
-}));
+// 动态计算冲刺效果位置
+const chargingEffectStyle = computed(() => {
+  const progress = props.item?.progress_num || 0; // 默认值为 0
+  return {
+    left: `${Math.min(progress, 100)}%`, // 根据 progress_num 调整位置
+    animationDelay: `${-progress / 10}s`, // 动态延迟确保动画效果平滑
+  };
+});
 </script>
 
 <style lang="scss" scoped>
@@ -292,7 +301,7 @@ const chargingEffectStyle = computed(() => ({
 
   /* 中间任务内容部分 */
   .context {
-    width: 60%; /* 中间内容区域宽度 */
+    width: 50%;
     height: 100%;
     display: flex;
     align-items: center;
@@ -301,37 +310,21 @@ const chargingEffectStyle = computed(() => ({
     position: relative;
     overflow: hidden;
 
-    /* 动态背景进度条 */
-    &::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      height: 100%;
-      width: calc(var(--progress-num, 0) * 1%); /* 动态进度宽度 */
-      background: linear-gradient(
-        to right,
-        rgba(173, 216, 230, 0.8),
-        rgba(255, 183, 77, 0.8)
-      );
-      z-index: -1;
-      transition: width 0.5s ease-in-out; /* 平滑过渡 */
-    }
-
     /* 冲刺效果 */
     .charging-effect {
       position: absolute;
       top: 0;
-      left: 0;
       height: 100%;
       width: 5%;
       background: linear-gradient(
-        to right,
+        to left,
         rgba(255, 255, 255, 0.8),
         rgba(255, 183, 77, 0.3)
       );
-      animation: charging 1.5s infinite linear; /* 冲刺动画 */
-      z-index: -1;
+      animation: charging 1.5s infinite linear;
+      z-index: 2;
+      pointer-events: none; /* 避免干扰交互 */
+      transition: left 0.5s ease-in-out; /* 动态调整位置 */
     }
   }
 
@@ -369,10 +362,10 @@ const chargingEffectStyle = computed(() => ({
 /* 冲刺动画关键帧 */
 @keyframes charging {
   0% {
-    transform: translateX(-100%);
+    transform: translateX(5%);
   }
   100% {
-    transform: translateX(100%);
+    transform: translateX(-30%);
   }
 }
 </style>

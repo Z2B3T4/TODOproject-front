@@ -14,7 +14,7 @@
           :flag="parseInt(route.params.typeId, 10)"
           @lift="handleLift"
           @delete="handleDelete"
-          @click="selectSubTask(item.id)"
+          @click="selectSubTask(item)"
         />
         <div class="first-list-pagination">
           <el-pagination
@@ -28,7 +28,7 @@
         </div>
       </div>
       <div class="second-list">
-        <div class="second-list-title">xxx的子任务</div>
+        <div class="second-list-title">{{ fatherName }}子任务</div>
         <ListItem
           v-for="(item, index) in taskStore.SubtaskList"
           :key="item.id"
@@ -80,10 +80,14 @@ onMounted(() => {
 });
 totalTaskCount.value = taskStore.totalTaskList.length;
 // #endregion
+
 // #region 获取子任务数据
-const selectSubTask = (id) => {
-  console.log("传过来的id", id);
-  taskStore.getSubTask(id);
+const fatherName = ref("");
+const selectSubTask = (item) => {
+  console.log("传过来的id", item.id);
+  fatherName.value = item.name;
+  taskStore.getSubTask(item.id);
+
   console.log(taskStore.SubtaskList[0]);
 };
 // #endregion
