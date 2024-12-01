@@ -1,6 +1,11 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import { getTaskListPageAPI, getTaskListAPI, getSubTaskAPI } from "@/apis/task";
+import {
+  getTaskListPageAPI,
+  getTaskListAPI,
+  getSubTaskAPI,
+  searchTaskAPI,
+} from "@/apis/task";
 export const useTaskStore = defineStore("task", () => {
   const taskList = ref([]);
   const SubtaskList = ref([]);
@@ -21,6 +26,11 @@ export const useTaskStore = defineStore("task", () => {
     const res = await getSubTaskAPI(id);
     SubtaskList.value = res.data;
   };
+
+  const searchTask = async (data: any) => {
+    const res = await searchTaskAPI(data);
+    taskList.value = res.data;
+  };
   return {
     taskList,
     totalTaskList,
@@ -28,5 +38,6 @@ export const useTaskStore = defineStore("task", () => {
     getTaskPageList,
     getTotalTaskList,
     getSubTask,
+    searchTask,
   };
 });

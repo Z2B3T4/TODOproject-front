@@ -1,5 +1,6 @@
 import httpInstance from "@/util/http";
 import { Flag } from "@element-plus/icons-vue";
+import { da } from "element-plus/es/locales.mjs";
 
 export const addTaskAPI = (data: any) => {
   return httpInstance({
@@ -35,5 +36,13 @@ export const getTaskListAPI = (data: any) => {
 export const getSubTaskAPI = (id: number) => {
   return httpInstance({
     url: `/todo/tasks/subtasks/${id}`,
+  });
+};
+
+export const searchTaskAPI = (data: any) => {
+  return httpInstance({
+    url: "/todo/tasks/search",
+    method: "POST",
+    data,
   });
 };

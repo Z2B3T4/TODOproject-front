@@ -26,6 +26,7 @@
           type="date"
           placeholder="选择起始时间"
           clearable
+          value-format="YYYY-MM-DD"
         />
       </el-form-item>
 
@@ -36,6 +37,7 @@
           type="date"
           placeholder="选择终止时间"
           clearable
+          value-format="YYYY-MM-DD"
         />
       </el-form-item>
 
@@ -49,15 +51,15 @@
       <!-- 按分组查询 -->
       <el-form-item label="分组查询">
         <el-select
-          v-model="searchCriteria.group"
+          v-model="searchCriteria.groupId"
           placeholder="选择分组"
           clearable
         >
           <el-option
-            v-for="group in groupOptions"
-            :key="group.value"
-            :label="group.label"
-            :value="group.value"
+            v-for="group in groupStore.groupList"
+            :key="group.id"
+            :label="group.name"
+            :value="group.id"
           />
         </el-select>
       </el-form-item>
@@ -65,15 +67,15 @@
       <!-- 按分类查询 -->
       <el-form-item label="分类查询">
         <el-select
-          v-model="searchCriteria.category"
+          v-model="searchCriteria.categoryId"
           placeholder="选择分类"
           clearable
         >
           <el-option
-            v-for="category in categoryOptions"
-            :key="category.value"
-            :label="category.label"
-            :value="category.value"
+            v-for="category in categoryStore.categoryList"
+            :key="category.id"
+            :label="category.name"
+            :value="category.id"
           />
         </el-select>
       </el-form-item>
@@ -89,7 +91,14 @@
 
 <script setup>
 import { ref } from "vue";
+import { useTaskStore } from "@/stores/taskStore";
+import { useGroupStore } from "@/stores/groupStore";
+import { useCategoryStore } from "@/stores/categoryStore";
+const taskStore = useTaskStore();
+const groupStore = useGroupStore();
+const categoryStore = useCategoryStore();
 
+// #region 进行查询
 // 查询条件
 const searchCriteria = ref({
   timeRange: "",
@@ -97,28 +106,16 @@ const searchCriteria = ref({
   startDate: "",
   endDate: "",
   isImportant: false,
-  group: "",
-  category: "",
+  groupId: 0,
+  categoryId: 0,
 });
-
-// 分组和分类选项
-const groupOptions = [
-  { label: "分组一", value: "work" },
-  { label: "分组二", value: "study" },
-  { label: "分组三", value: "life" },
-];
-
-const categoryOptions = [
-  { label: "学习", value: "todo" },
-  { label: "体育", value: "inProgress" },
-  { label: "工作", value: "completed" },
-];
-
 // 查询操作
-const handleSearch = () => {
-  console.log("查询条件：", searchCriteria.value);
-  // 在此处实现查询逻辑
+const handleSearch = async () => {
+  taskStore.searchTask(searchCriteria.value);
+  // console.log("查询条件：", searchCriteria.value.groupId);
+  // console.log("查询条件：", searchCriteria.value.categoryId);
 };
+// #endregion
 
 // 重置操作
 const resetSearch = () => {
