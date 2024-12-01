@@ -11,6 +11,7 @@
           :index="index"
           :isFirst="index === 0"
           :id="item.id"
+          :flag="parseInt(route.params.typeId, 10)"
           @lift="handleLift"
           @delete="handleDelete"
           @click="selectSubTask(item.id)"
@@ -35,6 +36,7 @@
           :index="index"
           :isFirst="index === 0"
           :id="item.id"
+          :flag="parseInt(route.params.typeId, 10)"
           @lift="handleLift"
           @delete="handleDelete"
         />
@@ -53,9 +55,8 @@ import { useTaskStore } from "@/stores/taskStore";
 import { useRoute } from "vue-router";
 // #endregion
 const route = useRoute();
-
-// #region 初始化渲染任务列表
 let flag = parseInt(route.params.typeId, 10); // 转换为整数
+// #region 初始化渲染任务列表
 const taskStore = useTaskStore();
 const Initdata = {
   page: 1,
@@ -63,7 +64,7 @@ const Initdata = {
   flag: flag,
 };
 onMounted(() => {
-  taskStore.getTaskPageList(Initdata);
+  taskStore.searchTask(Initdata);
 });
 // #endregion
 
@@ -100,7 +101,7 @@ const handlePageChange = (page) => {
     pageSize: pageSize.value,
     flag: flag,
   };
-  taskStore.getTaskPageList(data);
+  taskStore.searchTask(data);
 };
 // #endregion
 

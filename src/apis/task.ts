@@ -46,3 +46,11 @@ export const searchTaskAPI = (data: any) => {
     data,
   });
 };
+
+export const updateTaskAPI = (data: any) => {
+  return httpInstance({
+    url: "/todo/tasks",
+    method: "PUT",
+    data,
+  });
+};

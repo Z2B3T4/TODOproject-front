@@ -106,8 +106,11 @@ const searchCriteria = ref({
   startDate: "",
   endDate: "",
   isImportant: false,
-  groupId: 0,
-  categoryId: 0,
+  groupId: "",
+  categoryId: "",
+  page: 1,
+  pageSize: 5,
+  flag: 0,
 });
 // 查询操作
 const handleSearch = async () => {
@@ -125,8 +128,8 @@ const resetSearch = () => {
     startDate: "",
     endDate: "",
     isImportant: false,
-    group: "",
-    category: "",
+    groupId: "",
+    categoryId: "",
   };
 };
 </script>
