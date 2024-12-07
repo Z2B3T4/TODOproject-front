@@ -14,3 +14,10 @@ export const getGroupListAPI = () => {
     method: "GET",
   });
 };
+
+export const DelgroupAPI = (id: Number) => {
+  return httpInstance({
+    url: `/todo/groups/${id}`,
+    method: "DELETE",
+  });
+};

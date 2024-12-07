@@ -8,6 +8,9 @@
       <TextButton text="新建分组" @click="handleCreateGroup">
         <el-icon><Plus /></el-icon>
       </TextButton>
+      <TextButton text="删除分组" @click="handleDelGroup">
+        <el-icon><Minus /></el-icon>
+      </TextButton>
       <TextButton text="新建分类" @click="handleCreateCategory">
         <el-icon><Plus /></el-icon>
       </TextButton>
@@ -226,6 +229,42 @@
       </div>
     </el-dialog>
   </div>
+  <!-- 删除分组 -->
+  <div class="add-list" v-show="DelgroupDialogVisible === true">
+    <el-dialog
+      v-model="DelgroupDialogVisible"
+      title="新增任务"
+      width="500px"
+      draggable
+    >
+      <el-form
+        :model="DelGroupForm"
+        :rules="DelGroupFormrules"
+        ref="DelgroupFormRef"
+        label-width="100px"
+      >
+        <!-- 分组 -->
+        <el-form-item label="分组" prop="group">
+          <el-select v-model="DelGroupForm.groupId" placeholder="请选择分组">
+            <el-option
+              :label="item.name"
+              :value="item.id"
+              v-for="item in groupStore.groupList"
+              :key="item.id"
+            />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="DelgroupDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="handleDelGroupSubmit"
+            >确认</el-button
+          >
+        </div>
+      </template>
+    </el-dialog>
+  </div>
 </template>
 
 <script setup>
@@ -255,8 +294,8 @@ const dialogVisible = ref(false);
 const taskFormRef = ref();
 const taskForm = reactive({
   name: "",
-  groupId: 0,
-  category: 0,
+  groupId: "",
+  category: "",
   startTime: "",
   endTime: "",
   isImportant: false,
@@ -470,6 +509,51 @@ const handleKeydown = (event) => {
   if (event.key === " " || event.key === "Enter") {
     stopTimer();
   }
+};
+// #endregion
+
+// #region 删除分组
+const DelgroupDialogVisible = ref(false);
+const DelgroupFormRef = ref();
+const DelGroupForm = reactive({
+  groupId: "",
+});
+// 自定义规则
+const DelGroupFormrules = {
+  group: [{ required: true, message: "请选择删除组别", trigger: "blur" }],
+};
+// 当点击添加任务按钮时，控制属性，显示弹窗
+const handleDelGroup = () => {
+  DelgroupDialogVisible.value = true;
+};
+
+/**
+ * 提交任务表单的函数
+ * 该函数没有参数
+ * 没有返回值
+ * 主要功能是验证任务表单的数据是否有效，如果有效则添加任务，否则提示用户填写必要的任务信息
+ */
+const handleDelGroupSubmit = () => {
+  // 调用表单验证方法，如果表单数据有效，则valid为true
+  DelgroupFormRef.value.validate(async (valid) => {
+    if (valid) {
+      groupStore.delGroup(DelGroupForm.groupId);
+      ElMessage.success("删除成功！");
+      // 关闭任务添加对话框
+      DelgroupDialogVisible.value = false;
+      // 调用重置表单的函数
+      resetDelGroupForm();
+    } else {
+      // 如果表单数据无效，显示错误消息提示用户
+      ElMessage.error("请填写必要的任务信息！");
+    }
+  });
+};
+
+const resetDelGroupForm = () => {
+  Object.assign(DelGroupForm, {
+    groupId: "",
+  });
 };
 // #endregion
 </script>

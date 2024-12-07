@@ -20,7 +20,7 @@
           <el-pagination
             background
             layout="prev, pager, next"
-            :total="30"
+            :total="totalTaskCount"
             :current-page="currentPage"
             :page-size="pageSize"
             @current-change="handlePageChange"
@@ -138,7 +138,7 @@
 // #region 引入相关组件
 import { onMounted, reactive } from "vue";
 import ListItem from "@/views/TODO/components/ListItem.vue";
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import TODOsearch from "@/views/TODO/components/TODOsearch.vue";
 import { useTaskStore } from "@/stores/taskStore";
 import { useRoute } from "vue-router";
@@ -147,7 +147,7 @@ import { useGroupStore } from "@/stores/groupStore";
 import { useCategoryStore } from "@/stores/categoryStore";
 const groupStore = useGroupStore();
 const categoryStore = useCategoryStore();
-
+//
 // #endregion
 const route = useRoute();
 let flag = parseInt(route.params.typeId, 10); // 转换为整数
@@ -168,12 +168,15 @@ const totalTaskCount = ref(50);
 
 const totaldata = {
   type: 1,
-  flag: flag,
+  flag: parseInt(route.params.typeId, 10),
 };
 onMounted(() => {
   taskStore.getTotalTaskList(totaldata);
+  console.log("totalTaskList", taskStore.totalTaskList);
 });
+//
 totalTaskCount.value = taskStore.totalTaskList.length;
+
 // #endregion
 
 // #region 获取子任务数据
