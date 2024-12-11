@@ -76,7 +76,7 @@ watch(
     flag.value = match ? parseInt(match[1], 10) : null;
 
     // 获取数据
-    taskStore.getTaskPageList({
+    taskStore.searchTask({
       page: 1,
       pageSize: 5,
       flag: flag.value,

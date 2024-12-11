@@ -21,17 +21,6 @@ export const getTaskListPageAPI = ({ page, pageSize, flag }: any) => {
   });
 };
 
-export const getTaskListAPI = (data: any) => {
-  console.log("apidata:", data);
-  return httpInstance({
-    url: "/todo/tasks",
-    params: {
-      type: data.type,
-      flag: data.flag,
-    },
-  });
-};
-
 export const getSubTaskAPI = (id: number) => {
   return httpInstance({
     url: `/todo/tasks/subtasks/${id}`,
@@ -57,15 +46,18 @@ export const updateTaskAPI = (data: any) => {
 export const finishTaskAPI = (data: any) => {
   return httpInstance({
     url: "/todo/tasks/finish",
-    method: "POST",
+    method: "PUT",
     data,
   });
 };
 
-export const deleteTaskAPI = (data: any) => {
+export const deleteTaskAPI = ({ id, type }: any) => {
   return httpInstance({
     url: "/todo/tasks",
     method: "DELETE",
-    data,
+    params: {
+      id,
+      type,
+    },
   });
 };

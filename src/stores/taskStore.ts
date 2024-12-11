@@ -2,7 +2,6 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 import {
   getTaskListPageAPI,
-  getTaskListAPI,
   getSubTaskAPI,
   searchTaskAPI,
   updateTaskAPI,
@@ -21,7 +20,7 @@ export const useTaskStore = defineStore("task", () => {
   // 查询所有
   const getTotalTaskList = async (data: any) => {
     console.log(data);
-    const res = await getTaskListAPI(data);
+    const res = await searchTaskAPI(data);
     totalTaskList.value = res.data;
   };
   // 根据一级分类id查询子任务id

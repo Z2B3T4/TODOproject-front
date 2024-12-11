@@ -20,7 +20,7 @@
           <el-pagination
             background
             layout="prev, pager, next"
-            :total="totalTaskCount"
+            :total="50"
             :current-page="currentPage"
             :page-size="pageSize"
             @current-change="handlePageChange"
